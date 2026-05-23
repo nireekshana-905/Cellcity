@@ -1,3 +1,4 @@
+import os
 """
 Django settings for rose project.
 
@@ -25,7 +26,7 @@ SECRET_KEY = 'django-insecure-ehj3n1h7s#9qx=m!yt6o%4c!!1^xf@-47217#jj&o5rx0j9&0h
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -143,3 +144,4 @@ EMAIL_PORT = 587
 EMAIL_HOST_USER = 'sumanthking928@gmail.com'
 EMAIL_HOST_PASSWORD = 'mzojxtoxcpfndeok'
 EMAIL_USE_TLS = True
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
