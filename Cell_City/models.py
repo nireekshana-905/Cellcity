@@ -1,9 +1,7 @@
 from django.conf import settings
 from django.db import models
-from django.utils.text import slugify
-
-
-# Create your models here.
+from django.utils import timezone
+from .utils import generate_order_id
 
 class Brand(models.Model):
     name = models.CharField(max_length=100)
@@ -21,6 +19,16 @@ class Product(models.Model):
     stock_quantity = models.PositiveIntegerField(default=0)
     image_url = models.URLField()
     is_available = models.BooleanField(default=True)
+    battery = models.CharField(max_length=50, blank=True)
+    camera = models.CharField(max_length=50, blank=True)
+    processor = models.CharField(max_length=100, blank=True)
+    ram = models.CharField(max_length=50, blank=True)
+    storage = models.CharField(max_length=50, blank=True)
+    launch_year = models.IntegerField(default=2025)
+
+    gaming_score = models.IntegerField(default=5)
+    camera_score = models.IntegerField(default=5)
+    battery_score = models.IntegerField(default=5)
 
     def __str__(self):
         return self.name

@@ -9,6 +9,7 @@
 
 </head>
 <body>
+    {% include 'back_button.html' %}
     <main>
         <form method="POST" action="{% url 'feedback' %}">
             {% csrf_token %}

@@ -6,31 +6,50 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profile</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 </head>
 
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: #f8f9fa;
-        }
+       body{
+    font-family: Arial, sans-serif;
+    margin:0;
+    padding:20px;
+    background: linear-gradient(135deg,#0f172a,#1e293b,#2563eb);
+    min-height:100vh;
+    color:white;
+}
+
         
-        h1 {
-            text-align: center;
-            margin-bottom: 30px;
-        }
+       h1{
+    text-align:center;
+    margin-bottom:30px;
+    color:#00e5ff;
+    font-size:40px;
+    text-shadow:0 0 15px #00e5ff;
+}
         
-        .profile-card {
-            max-width: 400px;
-            margin: 0 auto;
-            background-color: #ffffff;
-            border: 1px solid #dee2e6;
-            border-radius: 4px;
-            padding: 30px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
+        .profile-card p{
+    color:white;
+    font-size:18px;
+}
+
+.address-card{
+    background:rgba(255,255,255,0.1);
+    color:white;
+    border-radius:15px;
+    border:1px solid rgba(255,255,255,0.2);
+    padding:20px;
+    margin-bottom:20px;
+}
+
+h2,h3{
+    color:#00e5ff;
+}
+
+strong{
+    color:#00e5ff;
+}
         
         .profile-card p {
             margin-bottom: 15px;
@@ -50,14 +69,11 @@
             margin-top: 30px;
         }
         
-        .address-card {
-            background-color: #ffffff;
-            border: 1px solid #dee2e6;
-            border-radius: 4px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
+       
+
+.address-card:hover{
+    transform:translateY(-8px);
+}
         
         .address-card p {
             margin-bottom: 10px;
@@ -90,25 +106,84 @@
             cursor: pointer;
             font-size: 16px;
         }
+        .profile-card{
+    text-align:center;
+    background:#1f2937;
+    color:white;
+    padding:30px;
+    border-radius:20px;
+    margin:20px;
+    box-shadow:0 0 20px rgba(0,0,0,0.4);
+}
+
+.profile-icon{
+    font-size:80px;
+    color:#00c6ff;
+}
+.account-section{
+    background:rgba(255,255,255,0.1);
+    backdrop-filter:blur(10px);
+    color:white;
+    padding:30px;
+    border-radius:20px;
+    margin-top:20px;
+    border:1px solid rgba(255,255,255,0.2);
+}
+.quick-links{
+    margin-top:20px;
+}
+
+.quick-links a{
+    margin:8px;
+    border-radius:30px;
+    padding:10px 20px;
+    font-weight:bold;
+}
     </style>
 </head>
 <body>
+    
     <div class="container">
         <h1>User Profile</h1>
-        
         <div class="profile-card">
-            <p><strong>Username:</strong> {{ user.username }}</p>
-            <p><strong>Email:</strong> {{ user.email }}</p>
-          
-            <h3>Change Password</h3>
-            <form class="profile-form" method="post" action="{% url 'change_password' %}">
-                {% csrf_token %}
-                {{ password_form.as_p }}
-                <button type="submit" class="btn btn-primary">Change Password</button>
-                <a href="{% url 'home' %}" class="btn btn-secondary" id="home">Return to Home</a>
 
-            </form>
-        </div>
+    <div class="profile-icon">
+        👤
+    </div>
+
+    <h2>{{ user.username }}</h2>
+
+    <p>{{ user.email }}</p>
+
+    <div class="quick-links">
+
+        <a href="{% url 'cart' %}" class="btn btn-primary">
+            🛒 Cart
+        </a>
+
+        <a href="{% url 'wishlist' %}" class="btn btn-danger">
+            ❤️ Wishlist
+        </a>
+
+        <a href="{% url 'my_orders' %}" class="btn btn-success">
+            📦 Orders
+        </a>
+
+    </div>
+
+</div>
+        
+        <div class="account-section text-center">
+
+    <a href="{% url 'change_password' %}" class="btn btn-warning btn-lg m-2">
+        🔐 Change Password
+    </a>
+
+    <a href="{% url 'home' %}" class="btn btn-success btn-lg m-2">
+        🏠 Return Home
+    </a>
+
+</div>
         
         <div class="address-container">
             <h2>View Saved Addresses</h2>

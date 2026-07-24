@@ -1,4 +1,3 @@
-import os
 """
 Django settings for rose project.
 
@@ -26,12 +25,14 @@ SECRET_KEY = 'django-insecure-ehj3n1h7s#9qx=m!yt6o%4c!!1^xf@-47217#jj&o5rx0j9&0h
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = []
 
 
 # Application definition
 
 INSTALLED_APPS = [
+    'jazzmin',
+
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -57,7 +58,7 @@ ROOT_URLCONF = 'rose.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR, 'templates'],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -144,4 +145,21 @@ EMAIL_PORT = 587
 EMAIL_HOST_USER = 'sumanthking928@gmail.com'
 EMAIL_HOST_PASSWORD = 'mzojxtoxcpfndeok'
 EMAIL_USE_TLS = True
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+JAZZMIN_SETTINGS = {
+    "site_title": "Cell City AI",
+    "site_header": "🚀 Cell City AI Admin",
+    "site_brand": "Cell City",
+    "welcome_sign": "Welcome to Cell City Administration",
+    "site_logo_classes": "img-circle",
+    "show_sidebar": True,
+    "navigation_expanded": True,
+}
+JAZZMIN_SETTINGS = {
+
+    "topmenu_links": [
+
+        {"name": "Home Page", "url": "/", "permissions": ["auth.view_user"]},
+
+    ],
+
+}

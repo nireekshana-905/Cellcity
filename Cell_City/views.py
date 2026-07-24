@@ -1,3 +1,4 @@
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
 from django.contrib.auth import login, authenticate
@@ -9,6 +10,9 @@ from .models import Brand, Product, CartItem, Wishlist, Order, Address, OrderIte
 from .forms import SignUpForm, FeedbackForm, AddressForm
 from fuzzywuzzy import fuzz
 from django.db.models import Q
+from django.http import JsonResponse
+from .models import Product
+import re
 
 
 def home(request):
@@ -133,12 +137,13 @@ def profile(request):
     addresses = Address.objects.filter(customer=user)
 
     return render(request, 'profile.html', {
-        'user': user,
-        'address_form': address_form,
-        'saved': saved,
-        'addresses': addresses,
-        'max_addresses_reached': max_addresses_reached
-    })
+    'user': user,
+    'address_form': address_form,
+    'password_form': PasswordChangeForm(user),
+    'saved': saved,
+    'addresses': addresses,
+    'max_addresses_reached': max_addresses_reached
+})
 
 
 def checkout(request):
@@ -388,3 +393,289 @@ def feedback(request):
 
 def thank_you(request):
     return render(request, 'thank_you.html')
+
+def ai_recommendation(request):
+
+    products = Product.objects.none()
+    brands = Brand.objects.all()
+
+    if request.method == "POST":
+
+        budget = request.POST.get("budget", "").strip()
+        brand = request.POST.get("brand", "").strip()
+
+        if budget:
+
+            # Budget Range
+            if "-" in budget:
+
+                try:
+                    min_budget, max_budget = map(int, budget.split("-"))
+
+                    products = Product.objects.filter(
+                        price__gte=min_budget,
+                        price__lte=max_budget
+                    )
+
+                except:
+                    products = Product.objects.none()
+
+            # Single Budget
+            else:
+
+                try:
+                    amount = int(budget)
+
+                    products = Product.objects.filter(
+                        price__lte=amount
+                    )
+
+                except:
+                    products = Product.objects.none()
+
+            # Brand Filter
+            if brand:
+
+                products = products.filter(
+                    brand__name__iexact=brand
+                )
+
+            # AI Ranking
+            products = products.order_by(
+                "-camera_score",
+                "-gaming_score",
+                "-battery_score"
+            )
+
+    return render(
+        request,
+        "ai_recommendation.html",
+        {
+            "products": products,
+            "brands": brands
+        }
+    )
+from django.http import JsonResponse
+from .models import Product
+import google.generativeai as genai
+import re
+
+model = genai.GenerativeModel("gemini-2.5-flash")
+def chatbot(request):
+
+    message = request.GET.get("message", "").lower().strip()
+
+    # Greetings
+
+    greetings = {
+        "hi": "👋 Hello! Welcome to Cell City. How can I help you today?",
+        "hii": "👋 Hello! Welcome to Cell City. How can I help you today?",
+        "hello": "👋 Hello! Welcome to Cell City. How can I help you today?",
+        "hey": "👋 Hello! Welcome to Cell City. How can I help you today?",
+        "good morning": "🌞 Good Morning! Welcome to Cell City.",
+        "gm": "🌞 Good Morning! Welcome to Cell City.",
+        "good afternoon": "☀️ Good Afternoon! How can I help you?",
+        "good evening": "🌆 Good Evening! Welcome to Cell City.",
+        "ge": "🌆 Good Evening! Welcome to Cell City.",
+        "how are you": "😊 I'm doing great! How can I help you find the perfect mobile?",
+        "thanks": "😊 You're welcome!",
+        "thank you": "😊 You're welcome!",
+        "thankyou": "😊 You're welcome!",
+        "bye": "👋 Goodbye! Thanks for visiting Cell City.",
+        "goodbye": "👋 Goodbye! Thanks for visiting Cell City."
+    }
+
+    if message in greetings:
+        return JsonResponse({"response": greetings[message]})
+
+    # Best Camera Phones
+
+    if "best camera" in message:
+        phones = Product.objects.order_by("-camera_score")[:5]
+
+        answer = "📸 Best Camera Phones:\n\n"
+
+        for p in phones:
+            answer += f"📱 {p.name} - ₹{p.price}\n"
+
+        return JsonResponse({"response": answer})
+
+    # Best Gaming Phones
+
+    if "best gaming" in message:
+        phones = Product.objects.order_by("-gaming_score")[:5]
+
+        answer = "🎮 Best Gaming Phones:\n\n"
+
+        for p in phones:
+            answer += f"📱 {p.name} - ₹{p.price}\n"
+
+        return JsonResponse({"response": answer})
+
+    # Best Battery Phones
+
+    if "best battery" in message:
+        phones = Product.objects.order_by("-battery_score")[:5]
+
+        answer = "🔋 Best Battery Phones:\n\n"
+
+        for p in phones:
+            answer += f"📱 {p.name} - ₹{p.price}\n"
+
+        return JsonResponse({"response": answer})
+
+    # Best RAM Phones
+
+    if "best ram" in message:
+        phones = Product.objects.order_by("-ram")[:5]
+
+        answer = "💾 Best RAM Phones:\n\n"
+
+        for p in phones:
+            answer += f"📱 {p.name} - {p.ram} RAM\n"
+
+        return JsonResponse({"response": answer})
+
+    # Best Processor Phones
+
+    if "best processor" in message:
+        phones = Product.objects.all()[:5]
+
+        answer = "⚡ Top Processor Phones:\n\n"
+
+        for p in phones:
+            answer += f"📱 {p.name} - {p.processor}\n"
+
+        return JsonResponse({"response": answer})
+
+    # Budget Search
+
+    budget_match = re.search(r'(\d{4,6})', message)
+
+    if budget_match:
+        budget = int(budget_match.group(1))
+
+        phones = Product.objects.filter(
+            price__lte=budget
+        ).order_by("price")
+
+        if phones.exists():
+
+            answer = f"💰 Phones Under ₹{budget}:\n\n"
+
+            for p in phones[:5]:
+                answer += f"📱 {p.name} - ₹{p.price}\n"
+
+            return JsonResponse({"response": answer})
+
+    # 2026 Phones
+
+    if "2026" in message:
+
+        phones = Product.objects.filter(
+            launch_year=2026
+        )
+
+        if phones.exists():
+
+            answer = "🚀 Mobiles Launched in 2026:\n\n"
+
+            for p in phones:
+                answer += f"📱 {p.name} - ₹{p.price}\n"
+
+            return JsonResponse({"response": answer})
+
+    # Best Phones
+
+    if "best mobile" in message or "best phone" in message:
+
+        phones = Product.objects.order_by(
+            "-camera_score",
+            "-gaming_score",
+            "-battery_score"
+        )[:5]
+
+        answer = "🏆 Top Phones:\n\n"
+
+        for p in phones:
+            answer += f"📱 {p.name} - ₹{p.price}\n"
+
+        return JsonResponse({"response": answer})
+
+    # Search by phone name
+
+    products = Product.objects.filter(
+        name__icontains=message
+    )
+
+    # Search by brand
+
+    if not products.exists():
+
+        brands = [
+            "apple",
+            "samsung",
+            "oneplus",
+            "vivo",
+            "oppo",
+            "realme",
+            "redmi",
+            "poco",
+            "motorola",
+            "iqoo",
+            "nokia",
+            "honor",
+            "tecno"
+        ]
+
+        for brand in brands:
+
+            if brand in message:
+
+                products = Product.objects.filter(
+                    brand__name__icontains=brand
+                )
+
+                break
+
+    # Product Details
+
+    if products.exists():
+
+        product = products.first()
+
+        answer = f"""
+📱 {product.name}
+
+💰 Price: ₹{product.price}
+🔋 Battery: {product.battery}
+📸 Camera: {product.camera}
+⚡ Processor: {product.processor}
+💾 RAM: {product.ram}
+📂 Storage: {product.storage}
+📅 Launch Year: {product.launch_year}
+"""
+
+        return JsonResponse({"response": answer})
+
+    # Gemini Fallback
+
+    prompt = f"""
+You are Cell City AI Assistant.
+
+Answer briefly in 3 lines.
+
+Question:
+{message}
+"""
+
+    response = model.generate_content(
+        prompt,
+        generation_config={
+            "max_output_tokens": 80
+        }
+    )
+
+    return JsonResponse({
+        "response": response.text
+    })
